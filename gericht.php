@@ -1,7 +1,7 @@
 <?php
 
 
-$db = mysqli_connect("192.168.178.42", "china", "wohping", "china");
+$db = mysqli_connect("127.0.0.1", "china", "wohping", "china");
 if(!$db)
 {
   exit("Verbindungsfehler: ".mysqli_connect_error());
@@ -11,7 +11,7 @@ if(!$db)
 $ergebnis = mysqli_query($db, "SELECT name,beschreibung,preis FROM gericht");
 
 echo "<div><b>Gerichte</b></div>";
-echo "<form action='Index.php'>
+echo "<form action='index.php'>
         <div>
             <input type='submit' value='Start'/>
         </div>

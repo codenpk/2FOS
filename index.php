@@ -1,6 +1,6 @@
 <?php
 
-$db = mysqli_connect("localhost", "china", "wohping", "china");
+$db = mysqli_connect("127.0.0.1", "china", "wohping", "china");
 
 if(!$db)
 {
@@ -10,7 +10,7 @@ if(!$db)
 $ergebnis = mysqli_query($db, "SELECT kuerzel,bid FROM benutzer");
 
 echo "<div><b>Meine Bestellungen</b></div>";
-echo "<form action='Gericht.php'>
+echo "<form action='gericht.php'>
     <div>
          <input type='submit' value='Gericht' />
     </div>
