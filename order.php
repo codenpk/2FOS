@@ -1,81 +1,160 @@
+<!doctype html>
+
 <?php
-// First, let's connect to the database
-$db = mysqli_connect("127.0.0.1", "china", "wohping", "china");
+//Connect to database
+$db = mysqli_connect("localhost", "china", "wohping", "china");
 if(!$db)
 {
-  exit("connection error: ".mysqli_connect_error());
+  exit("Verbindungsfehler: ".mysqli_connect_error());
 }
-// are the POST Values set?
-if(isset($_POST['gid']) && isset($_POST['quantity']) && isset($_POST['bid']))
-{
-    $quantity = $_POST['quantity'];
-    $gid = $_POST['gid'];
-    $bid = $_POST['bid'];
-    
+
+//Is there an input for "Suche"
+if(isset($_POST['nameGID'])){
+    //Edit the SQL - Statement
+   $Food="WHERE name='".$_POST['nameGID']."'"; 
+}else{
+    if(isset($_POST['nameFood'])){
+        //Edit the SQL - Statement
+        $Food="WHERE beschreibung='".$_POST['nameFood']."'"; 
+    }
+
+    else{
+        //Do not add anything
+        $Food="";
+    }
+}
+//Get data for the tables
+$ergebnis = mysqli_query($db, "SELECT gid,name,beschreibung,preis FROM gericht $Food");
+$historieErgebnis = mysqli_query($db, "SELECT bid,gid,anzahl FROM bestellung WHERE bid=1");
+
+//Is there a value for "Bestellen"
+if(isset($_POST['number1Food']) && isset($_POST['number2Food'])){
+ 
+    $GID=$_POST['number1Food'];
+    $Anzahl=$_POST['number2Food'];
     
     //INSERT the new value
-    $insertErgebnis = mysqli_query($db, "INSERT INTO bestellung (bid,gid,anzahl) VALUE ($bid, $gid, $quantity)");
-    // and redirect to the index.php
-    header("Location: index.php?bid=$bid");
+    $insertErgebnis = mysqli_query($db, "INSERT into bestellung (gid,bid,anzahl) value ($GID,1,$Anzahl)");
+    
+    $eintragen = mysql_query($insertErgebnis);
 }
-// If not work with the get values and offer the option to add an order
-else {
-	
-	// this checks if the parameter bid= is submitted, if not it redirects to a site with empty parameter bid
-	if(!isset($_GET["bid"])) 
-	{
-		header("Location: order.php?bid=");
-	}
-	
-	// if the parameter bid is submitted but empty then ask the user to enter a valid bid
-	else if($_GET["bid"] === "") 
-	{
-		die('Please enter your User-ID after bid= in the addressbox.');
-	}
-	else 
-	{
-		// at this point the parameter bid is submitted and not empty. let's save it in a variable
-		$bid = $_GET["bid"];
-	}
 ?>
 
-<!DOCTYPE html>
-<html>
+<html class="no-js" lang="en">
+    
+    <!--  Head-->  
     <head>
-	<meta http-equiv="content-type" content="text/html; charset=ISO-8859-15">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>2FOS Meine Bestellungen</title>
+        <link rel="stylesheet" href="css/foundation.css" />
+        <script src="js/vendor/modernizr.js"></script>
     </head>
+  
     <body>
-	<h1>Add an order:</h1>
-	<table border=5>
-            <tr>
-              <th>gid</th>
-              <th>Gericht</th>
-              <th>Beschreibung</th>
-              <th>Preis</th>
-            </tr>
-<?php
-$ergebnis = mysqli_query($db, "SELECT gid, name,beschreibung,preis FROM gericht");
-while($daten=mysqli_fetch_array($ergebnis))
-{
-    echo "<tr>
-	    <td>".$daten['gid']."</td>
-	    <td>".$daten['name']."</td>
-	    <td>".$daten['beschreibung']."</td>
-	    <td>".number_format(($daten['preis']/100), 2,',', '')."";echo chr(164);echo "</td>
-	  </tr>";
-}?>
-	</table>
-	<p>
-	    <form name="input" action="order.php" method="POST">
-	GID: <input type="text" name="gid">
-	Anzahl: <input type="text" name="quantity">
-	<input type="hidden" name="bid" value="<?php echo $bid; ?>">
-	<input type="submit" value="Submit">
-</form>
-</html>
+      
+    <!-- Tob-Bar -->    
+    <div class="fixed">
+        <nav class="top-bar" data-topbar>
+            <ul class="title-area">
+                <li class="name">
+                    <h1><a href="#">2FOS</a></h1></li>
+                <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
+            </ul>
+        </nav>
+    </div>
 
-<?php
-// don't forget we are in a big else section beginning in line 22
-}
-?>
+    <!-- "Meine Bestellungen" -->  
+    <div class="row" style="margin-top:60px">
+        <div class="large-6 columns">
+            <div class="panel">
+                <h2>Meine Bestellungen</h2>
+                <div class="panel callout radius">
+                    <p>Fügen Sie eine Bestellung hinzu!</p>
+                </div>
+                
+                <!-- Buttons and Lables -->
+                <form action="order.php" method="POST">
+                    <p>Nummer des Gerichts: <br><input name="number1Food" class="large-4 columns" type="text" size="10" maxlength="30"></p>
+                    <p>Anzahl der Gerichte: <br><input name="number2Food" class="large-4 columns" type="text" size="10" maxlength="30"></p>
+                    <input class="button [tiny small large]" type="submit" name="orderFood" value=" Bestellen ">
+                </form>
+            </div>
+          
+            <!-- "Bstellhistorie" -->
+            <div class="large-12 columns">
+                <div class="row">
+                    <div class="panel">
+                        <h1>Bestellhistorie</h1>
 
+                        <?php
+                        echo "<table>
+                               <tr>
+                                 <th>Benutzer</th>
+                                 <th>Gericht</th>
+                                 <th>Preis</th>
+                               </tr>";
+
+                        //Tabelle mit Daten füllen
+                        while($daten=mysqli_fetch_array($historieErgebnis)){
+
+                        echo "<tr>
+                                <td>".$daten['bid']."</td>
+                                <td>".$daten['gid']."</td>
+                                <td>".$daten['anzahl']."</td>
+                             </tr>";
+                        }
+                        echo     "</table>";
+                        ?>
+
+                    </div>
+                </div>    
+            </div>
+        </div>
+        
+        <!-- Gericht Suchen -->
+        <div class="large-6 columns" >
+            <div class="panel" style="position:fixed">
+                <h2>Gericht Suchen</h2>
+                
+                <!-- Buttons and Lables -->
+                <div class="row">
+                    
+                    <!-- Suchen="Beschreibung" -->
+                    <div class="medium-6 columns">
+                        <form action="order.php" method="POST">
+                            <p>Beschreibung:<br><input name="nameFood" type="text" maxlength="30"></p>
+                            <input class="button [tiny small large]" type="submit" name="getFood" value=" Suchen ">
+                        </form>
+                    </div>
+                    
+                    <!-- Suchen="Gericht ID" -->
+                    <div class="medium-6 columns">
+                        <form action="order.php" method="POST">
+                            <p>Gericht ID:<br><input name="nameGID" type="text" maxlength="30"></p>
+                            <input class="button [tiny small large]" type="submit" name="getGID" value=" Suchen ">
+                        </form>
+                    </div>
+                    
+                </div>
+
+                <?php
+                echo "<table>
+                       <tr>
+                         <th>Gericht</th>
+                         <th>Beschreibung</th>
+                         <th>Preis</th>
+                       </tr>";
+
+                while($daten=mysqli_fetch_array($ergebnis)){
+
+                echo "<tr>
+                        <td>".$daten['name']."</td>
+                        <td>".$daten['beschreibung']."</td>
+                        <td>".number_format(($daten['preis']/100), 2,',', '')." echo chr(164)</td>
+                     </tr>";
+                }
+                echo     "</table>";
+                ?>
+            </div>
+      </div>
+  </div>
