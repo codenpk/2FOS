@@ -1,4 +1,5 @@
 <?php
+	header('Content-Type: text/html; charset=utf-8');
 	// this checks if the parameter uid= is submitted, if not it redirects to a site with empty parameter uid
 	if(!isset($_GET["uid"]))
 	{
@@ -20,6 +21,11 @@
 		{
 			die("connection error: ".mysqli_connect_error());
 		}
+		mysql_query("SET character_set_results=utf8", $db);
+    		mb_language('uni'); 
+    		mb_internal_encoding('UTF-8');
+    		mysql_select_db($argDB, $db);
+    		mysql_query("set names 'utf8'",$db);
 		$result = mysqli_query($db, "SELECT uid, prename FROM user WHERE uid='$uid'");
 		// if the name exists in the database
 		if(mysqli_num_rows($result) == 0)
@@ -46,7 +52,8 @@
 
     <!--  Head-->  
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="ISO-8859-15"/>
+	<meta http-equiv="content-type" content="text/html; charset=latin-1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>2FOS My orders</title>
         <link rel="stylesheet" href="css/foundation.css" />
         <script src="js/vendor/modernizr.js"></script>
@@ -91,8 +98,8 @@
 													<td>".$currentrow['name']."</td>
 													<td>".$currentrow['description']." ".$currentrow['long_description']."</td>
 													<td>".$currentrow['amount']."</td>
-													<td>".number_format(($currentrow['price']/100), 2,',', '').""; echo chr(164); echo "</td>
-												</tr>";
+													<td>".number_format(($currentrow['price']/100), 2,',', '').""; echo "&euro;"; echo "</td>
+											</tr>";
 										}
 										
 										
@@ -112,7 +119,7 @@
 									$result = mysqli_query($db, "select * from dish");
 									while($currentrow=mysqli_fetch_array($result))
 										{
-											echo "<option value=\"".$currentrow['did']."\">".$currentrow['name']." - ".$currentrow['description']." ".$currentrow['long_description'].", ".number_format(($currentrow['price']/100), 2,',', '').""; echo chr(164); echo "</option>";
+											echo "<option value=\"".$currentrow['did']."\">".$currentrow['name']." - ".$currentrow['description']." ".$currentrow['long_description'].", ".number_format(($currentrow['price']/100), 2,',', '').""; echo "&euro;"; echo "</option>";
 										}
 								?>                              
                             </select>
